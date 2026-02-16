@@ -1,0 +1,58 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <h1>Financial Insights</h1>
+    <div class="flex gap-2">
+        <button onclick="generateInsight('revenue_forecast')" class="btn btn-secondary">Revenue Forecast</button>
+        <button onclick="generateInsight('expense_analysis')" class="btn btn-secondary">Expense Analysis</button>
+        <button onclick="generateInsight('cash_flow')" class="btn btn-secondary">Cash Flow</button>
+        <button onclick="generateInsight('client_summary')" class="btn btn-secondary">Client Summary</button>
+    </div>
+</div>
+
+<div id="loading" style="display:none; text-align: center; margin: 2rem;">
+    <p>Analyzing data with Gemini AI... This may take a few seconds.</p>
+</div>
+
+<div class="grid-2">
+    {% for insight in insights %}
+    <div class="card">
+        <h3>{{ insight.insight_type|replace('_', ' ')|title }}</h3>
+        <p style="color: var(--text-secondary); font-size: 0.875rem;">Generated: {{ insight.generated_at.strftime('%Y-%m-%d %H:%M') }}</p>
+        <div style="margin-top: 1rem; color: var(--text-primary); max-height: 100px; overflow: hidden; position: relative;">
+            {{ insight.content[:200] }}...
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, var(--bg-card));"></div>
+        </div>
+        <a href="/insights/{{ insight.id }}" class="btn btn-sm btn-secondary mt-4">Read Full Report</a>
+    </div>
+    {% endfor %}
+    {% if not insights %}
+    <div class="card" style="grid-column: span 2; text-align: center; padding: 3rem;">
+        <p>No insights generated yet. Click one of the buttons above to analyze your financial data.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+async function generateInsight(type) {
+    document.getElementById('loading').style.display = 'block';
+    try {
+        const res = await fetch('/api/insights/analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({insight_type: type})
+        });
+        const data = await res.json();
+        if (data.error) {
+            alert('Error: ' + data.error);
+        } else {
+            window.location.href = '/insights/' + data.id;
+        }
+    } catch (e) {
+        alert('Error generating insight');
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

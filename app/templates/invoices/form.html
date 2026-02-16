@@ -1,0 +1,126 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <h1>{% if invoice %}Edit Invoice{% else %}New Invoice{% endif %}</h1>
+    <a href="{% if invoice %}/invoices/{{ invoice.id }}{% else %}/invoices{% endif %}" class="btn btn-secondary">Cancel</a>
+</div>
+
+<div class="card">
+    <form method="post" action="{% if invoice %}/invoices/{{ invoice.id }}/edit{% else %}/invoices/new{% endif %}">
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Client</label>
+                <select name="client_id" required>
+                    <option value="">Select Client...</option>
+                    {% for client in clients %}
+                    <option value="{{ client.id }}" {% if invoice and invoice.client_id == client.id %}selected{% endif %}>{{ client.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Invoice Number</label>
+                <input type="text" name="invoice_number" value="{% if invoice %}{{ invoice.invoice_number }}{% else %}{{ next_invoice_number }}{% endif %}" required>
+            </div>
+        </div>
+        
+        <div class="grid-3">
+            <div class="form-group">
+                <label>Issue Date</label>
+                <input type="date" name="issue_date" value="{% if invoice %}{{ invoice.issue_date }}{% else %}{{ today }}{% endif %}" required>
+            </div>
+            <div class="form-group">
+                <label>Due Date</label>
+                <input type="date" name="due_date" value="{% if invoice %}{{ invoice.due_date }}{% endif %}" required>
+            </div>
+            <div class="form-group">
+                <label>Tax Rate (%)</label>
+                <input type="number" step="0.01" name="tax_rate" value="{% if invoice %}{{ invoice.tax_rate }}{% else %}0.00{% endif %}">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Currency</label>
+            <select name="currency">
+                <option value="USD" {% if invoice and invoice.currency == 'USD' %}selected{% endif %}>USD ($)</option>
+                <option value="EUR" {% if invoice and invoice.currency == 'EUR' %}selected{% endif %}>EUR (€)</option>
+                <option value="GBP" {% if invoice and invoice.currency == 'GBP' %}selected{% endif %}>GBP (£)</option>
+                <option value="CAD" {% if invoice and invoice.currency == 'CAD' %}selected{% endif %}>CAD ($)</option>
+                <option value="AUD" {% if invoice and invoice.currency == 'AUD' %}selected{% endif %}>AUD ($)</option>
+            </select>
+        </div>
+        
+        <h3 class="mt-4">Line Items</h3>
+        <table id="line-items-table" style="margin-bottom: 1rem;">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Description</th>
+                    <th style="width: 15%;">Quantity</th>
+                    <th style="width: 20%;">Unit Price</th>
+                    <th style="width: 5%;"></th>
+                </tr>
+            </thead>
+            <tbody id="line-items-body">
+                {% if invoice and invoice.line_items %}
+                    {% for item in invoice.line_items %}
+                    <tr>
+                        <td><input type="text" name="descriptions" value="{{ item.description }}" required></td>
+                        <td><input type="number" step="0.1" name="quantities" value="{{ item.quantity }}" required></td>
+                        <td><input type="number" step="0.01" name="unit_prices" value="{{ item.unit_price }}" required></td>
+                        <td><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">X</button></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <!-- Default empty row -->
+                    <tr>
+                        <td><input type="text" name="descriptions" placeholder="Item description" required></td>
+                        <td><input type="number" step="0.1" name="quantities" value="1.0" required></td>
+                        <td><input type="number" step="0.01" name="unit_prices" value="0.00" required></td>
+                        <td><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">X</button></td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        
+        <button type="button" class="btn btn-secondary mb-4" onclick="addRow()">+ Add Line Item</button>
+        
+        <div class="form-group">
+            <label>Notes</label>
+            <textarea name="notes" rows="3">{% if invoice %}{{ invoice.notes }}{% endif %}</textarea>
+        </div>
+        
+        <div class="flex justify-end gap-2">
+            <button type="submit" class="btn btn-primary">Save Invoice</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function addRow() {
+        const tbody = document.getElementById('line-items-body');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="text" name="descriptions" placeholder="Item description" required></td>
+            <td><input type="number" step="0.1" name="quantities" value="1.0" required></td>
+            <td><input type="number" step="0.01" name="unit_prices" value="0.00" required></td>
+            <td><button type="button" class="btn btn-sm btn-danger" onclick="removeRow(this)">X</button></td>
+        `;
+        tbody.appendChild(row);
+    }
+    
+    function removeRow(btn) {
+        const tbody = document.getElementById('line-items-body');
+        if (tbody.children.length > 1) {
+            btn.closest('tr').remove();
+        } else {
+            // Clear inputs if it's the last row
+            const inputs = btn.closest('tr').querySelectorAll('input');
+            inputs.forEach(input => {
+                if(input.name === 'quantities') input.value = "1.0";
+                else if(input.name === 'unit_prices') input.value = "0.00";
+                else input.value = "";
+            });
+        }
+    }
+</script>
+{% endblock %}

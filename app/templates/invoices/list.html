@@ -1,0 +1,45 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <h1>Invoices</h1>
+    <a href="/invoices/new" class="btn btn-primary">+ New Invoice</a>
+</div>
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice #</th>
+                <th>Client</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th class="text-right">Total</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in invoices %}
+            <tr>
+                <td><a href="/invoices/{{ inv.id }}" style="font-weight: 500; color: var(--primary);">{{ inv.invoice_number }}</a></td>
+                <td>{{ inv.client.name }}</td>
+                <td>{{ inv.issue_date }}</td>
+                <td>
+                    {{ inv.due_date }}
+                    {% if inv.status != 'paid' and inv.status != 'cancelled' and inv.due_date < today %}
+                    <span style="color: var(--danger);">⚠️</span>
+                    {% endif %}
+                </td>
+                <td><span class="badge badge-{{ inv.status }}">{{ inv.status }}</span></td>
+                <td class="text-right">${{ "%.2f"|format(inv.total) }}</td>
+                <td class="text-right">
+                    <a href="/invoices/{{ inv.id }}/edit" class="btn btn-sm btn-secondary">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not invoices %}
+            <tr><td colspan="7" class="text-center" style="padding: 2rem;">No invoices found.</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

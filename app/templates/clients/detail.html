@@ -1,0 +1,70 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <div>
+        <a href="/clients" style="color: var(--text-secondary); text-decoration: none;">&larr; Back to Clients</a>
+        <h1>{{ client.name }}</h1>
+    </div>
+    <div class="flex gap-2">
+        <a href="/clients/{{ client.id }}/edit" class="btn btn-secondary">Edit Client</a>
+        <form action="/clients/{{ client.id }}/delete" method="post" style="display:inline;" onsubmit="return confirm('Delete this client? All invoices will be deleted.')">
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h3>Contact Info</h3>
+        <p><strong>Email:</strong> {{ client.email }}</p>
+        <p><strong>Phone:</strong> {{ client.phone or 'N/A' }}</p>
+        <p><strong>Tax ID:</strong> {{ client.tax_id or 'N/A' }}</p>
+    </div>
+    <div class="card">
+        <h3>Address</h3>
+        <p>{{ client.address or 'N/A' }}</p>
+        <p>
+            {% if client.city %}{{ client.city }}{% endif %}
+            {% if client.country %}, {{ client.country }}{% endif %}
+        </p>
+    </div>
+</div>
+
+{% if client.notes %}
+<div class="card">
+    <h3>Notes</h3>
+    <p>{{ client.notes }}</p>
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>Invoices</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th class="text-right">Total</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in invoices %}
+            <tr>
+                <td><a href="/invoices/{{ inv.id }}">{{ inv.invoice_number }}</a></td>
+                <td>{{ inv.issue_date }}</td>
+                <td><span class="badge badge-{{ inv.status }}">{{ inv.status }}</span></td>
+                <td class="text-right">${{ "%.2f"|format(inv.total) }}</td>
+                <td class="text-right">
+                    <a href="/invoices/{{ inv.id }}" class="btn btn-sm btn-secondary">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not invoices %}
+            <tr><td colspan="5" class="text-center">No invoices for this client.</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

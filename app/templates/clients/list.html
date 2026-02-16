@@ -1,0 +1,38 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <h1>Clients</h1>
+    <a href="/clients/new" class="btn btn-primary">+ New Client</a>
+</div>
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th class="text-right">Total Invoiced</th>
+                <th class="text-right">Paid</th>
+                <th class="text-right">Outstanding</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td><a href="/clients/{{ client.id }}" style="font-weight: 500; color: var(--primary);">{{ client.name }}</a></td>
+                <td>{{ client.email }}</td>
+                <td class="text-right">${{ "%.2f"|format(client.total_invoiced) }}</td>
+                <td class="text-right" style="color: var(--success);">${{ "%.2f"|format(client.total_paid) }}</td>
+                <td class="text-right" style="color: var(--danger);">${{ "%.2f"|format(client.outstanding_balance) }}</td>
+                <td class="text-right">
+                    <a href="/clients/{{ client.id }}/edit" class="btn btn-sm btn-secondary">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not clients %}
+            <tr><td colspan="6" class="text-center" style="padding: 2rem;">No clients found.</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

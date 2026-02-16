@@ -1,34 +1,38 @@
 {% extends "layout/base.html" %}
-
 {% block content %}
-<div class="top-bar">
-    <h1>Pricing</h1>
+<div style="text-align: center; margin-bottom: 2rem;">
+    <h1>Simple, Powerful Invoicing</h1>
+    <p style="color: var(--text-secondary);">Choose the plan that fits your business needs.</p>
 </div>
 
-<div class="pricing-grid">
-    <div class="plan-card">
-        <div class="plan-title">Free</div>
-        <div class="plan-price">$0 / month</div>
-        <ul class="features-list">
-            <li>Unlimited notes</li>
-            <li>Create, edit, delete</li>
-            <li>3 sample notes</li>
-            <li>Secure storage</li>
+<div class="grid-2" style="max-width: 800px; margin: 0 auto;">
+    <!-- Free Plan -->
+    <div class="card" style="text-align: center;">
+        <h2>Free</h2>
+        <div class="price" style="font-size: 2.5rem; font-weight: bold; margin: 1rem 0;">$0 <span style="font-size: 1rem; color: var(--text-secondary);">/ month</span></div>
+        <ul style="list-style: none; margin: 2rem 0; text-align: left; padding: 0 2rem;">
+            <li style="margin-bottom: 0.5rem;">✅ Up to 5 Clients</li>
+            <li style="margin-bottom: 0.5rem;">✅ 10 Invoices/month</li>
+            <li style="margin-bottom: 0.5rem;">✅ Expense Tracking</li>
+            <li style="margin-bottom: 0.5rem;">✅ Basic Reports</li>
         </ul>
-        <a href="/auth/login" class="btn btn-outline" style="width: 100%; display: block; text-align: center;">Get Started</a>
+        <a href="/auth/login" class="btn btn-secondary w-full" style="display: block; width: 100%;">Get Started</a>
     </div>
 
-    <div class="plan-card premium">
-        <div class="plan-title">Premium</div>
-        <div class="plan-price">$9 / month</div>
-        <ul class="features-list">
-            <li>Everything in Free</li>
-            <li>AI Summarization</li>
-            <li>AI Chat (Coming Soon)</li>
-            <li>Priority Support</li>
+    <!-- Premium Plan -->
+    <div class="card" style="text-align: center; border: 2px solid var(--primary); position: relative;">
+        <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 0.25rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: bold;">RECOMMENDED</div>
+        <h2>Premium</h2>
+        <div class="price" style="font-size: 2.5rem; font-weight: bold; margin: 1rem 0;">$29 <span style="font-size: 1rem; color: var(--text-secondary);">/ month</span></div>
+        <ul style="list-style: none; margin: 2rem 0; text-align: left; padding: 0 2rem;">
+            <li style="margin-bottom: 0.5rem;">✅ <strong>Everything in Free</strong></li>
+            <li style="margin-bottom: 0.5rem;">✅ Unlimited Clients & Invoices</li>
+            <li style="margin-bottom: 0.5rem;">✅ AI Financial Insights</li>
+            <li style="margin-bottom: 0.5rem;">✅ Multi-currency Support</li>
+            <li style="margin-bottom: 0.5rem;">✅ Priority Support</li>
         </ul>
-        <form action="/subscribe" method="post">
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Subscribe</button>
+        <form action="/subscribe" method="POST">
+            <button type="submit" class="btn btn-primary w-full" style="width: 100%;">Subscribe</button>
         </form>
     </div>
 </div>

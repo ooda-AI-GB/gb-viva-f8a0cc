@@ -1,0 +1,122 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <h1>Dashboard</h1>
+    <a href="/invoices/new" class="btn btn-primary">+ New Invoice</a>
+</div>
+
+<!-- Alerts -->
+{% if overdue_invoices %}
+<div class="card" style="border-left: 4px solid var(--danger);">
+    <h3>⚠️ Overdue Invoices</h3>
+    <p>You have {{ overdue_invoices|length }} overdue invoices requiring attention.</p>
+    <div style="margin-top: 1rem;">
+        {% for inv in overdue_invoices %}
+        <div class="flex justify-between" style="border-bottom: 1px solid var(--border); padding: 0.5rem 0;">
+            <span><a href="/invoices/{{ inv.id }}">{{ inv.invoice_number }}</a> - {{ inv.client.name }}</span>
+            <span style="color: var(--danger); font-weight: bold;">{{ inv.days_overdue }} days overdue</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Stats -->
+<div class="grid-4">
+    <div class="card stat-card">
+        <div class="stat-label">Revenue (This Month)</div>
+        <div class="stat-value" style="color: var(--success);">${{ "%.2f"|format(total_paid_month) }}</div>
+        <div style="font-size: 0.75rem; color: var(--text-secondary);">Invoiced: ${{ "%.2f"|format(total_invoiced_month) }}</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-label">Outstanding</div>
+        <div class="stat-value" style="color: var(--warning);">${{ "%.2f"|format(total_outstanding) }}</div>
+        <div style="font-size: 0.75rem; color: var(--text-secondary);">Unpaid invoices</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-label">Clients</div>
+        <div class="stat-value">{{ total_clients }}</div>
+        <div style="font-size: 0.75rem; color: var(--text-secondary);">Active customers</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-label">Expenses (YTD)</div>
+        <div class="stat-value" style="color: var(--danger);">${{ "%.2f"|format(expenses_ytd) }}</div>
+        <div style="font-size: 0.75rem; color: var(--text-secondary);">vs Revenue: ${{ "%.2f"|format(revenue_ytd) }}</div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Chart -->
+    <div class="card">
+        <h3>Revenue vs Expenses (6 Months)</h3>
+        <div class="chart-container">
+            {% for d in chart_data %}
+            <div class="bar-group">
+                <div class="bars">
+                    <div class="bar bar-revenue" style="height: {{ d.revenue_pct }}%;" title="Revenue: ${{ d.revenue }}"></div>
+                    <div class="bar bar-expenses" style="height: {{ d.expenses_pct }}%;" title="Expenses: ${{ d.expenses }}"></div>
+                </div>
+                <div class="bar-label">{{ d.month }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="flex justify-center gap-4 mt-4" style="font-size: 0.75rem;">
+            <div class="flex items-center gap-2">
+                <div style="width: 10px; height: 10px; background-color: var(--success);"></div> Revenue
+            </div>
+            <div class="flex items-center gap-2">
+                <div style="width: 10px; height: 10px; background-color: var(--danger);"></div> Expenses
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="card">
+        <h3>Invoice Status</h3>
+        <table style="margin-top: 1rem;">
+            {% for status, count in status_counts.items() %}
+            <tr>
+                <td style="text-transform: capitalize;">{{ status }}</td>
+                <td class="text-right">
+                    <span class="badge badge-{{ status }}">{{ count }}</span>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not status_counts %}
+            <tr><td colspan="2" style="text-align: center; color: var(--text-secondary);">No invoices yet</td></tr>
+            {% endif %}
+        </table>
+    </div>
+</div>
+
+<!-- Recent Invoices -->
+<div class="card">
+    <h3>Recent Invoices</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice #</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th class="text-right">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in recent_invoices %}
+            <tr>
+                <td><a href="/invoices/{{ inv.id }}" style="color: var(--primary); text-decoration: none; font-weight: 500;">{{ inv.invoice_number }}</a></td>
+                <td>{{ inv.client.name }}</td>
+                <td>{{ inv.issue_date }}</td>
+                <td><span class="badge badge-{{ inv.status }}">{{ inv.status }}</span></td>
+                <td class="text-right">${{ "%.2f"|format(inv.total) }}</td>
+            </tr>
+            {% endfor %}
+            {% if not recent_invoices %}
+            <tr><td colspan="5" style="text-align: center; padding: 2rem;">No invoices found. <a href="/invoices/new">Create your first invoice</a>.</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

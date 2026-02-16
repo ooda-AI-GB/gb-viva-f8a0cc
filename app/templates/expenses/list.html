@@ -1,0 +1,62 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <h1>Expenses</h1>
+    <a href="/expenses/new" class="btn btn-primary">+ New Expense</a>
+</div>
+
+<div class="flex gap-2 mb-4">
+    <a href="/expenses" class="btn btn-sm {% if not selected_category %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+    <a href="/expenses?category=software" class="btn btn-sm {% if selected_category == 'software' %}btn-primary{% else %}btn-secondary{% endif %}">Software</a>
+    <a href="/expenses?category=hardware" class="btn btn-sm {% if selected_category == 'hardware' %}btn-primary{% else %}btn-secondary{% endif %}">Hardware</a>
+    <a href="/expenses?category=travel" class="btn btn-sm {% if selected_category == 'travel' %}btn-primary{% else %}btn-secondary{% endif %}">Travel</a>
+    <a href="/expenses?category=office" class="btn btn-sm {% if selected_category == 'office' %}btn-primary{% else %}btn-secondary{% endif %}">Office</a>
+    <a href="/expenses?category=marketing" class="btn btn-sm {% if selected_category == 'marketing' %}btn-primary{% else %}btn-secondary{% endif %}">Marketing</a>
+    <a href="/expenses?category=professional" class="btn btn-sm {% if selected_category == 'professional' %}btn-primary{% else %}btn-secondary{% endif %}">Professional</a>
+</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Vendor</th>
+                <th class="text-right">Amount</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>{{ expense.date }}</td>
+                <td><span class="badge badge-{{ expense.category }}">{{ expense.category }}</span></td>
+                <td>
+                    {{ expense.description }}
+                    {% if expense.tax_deductible %}
+                    <span title="Tax Deductible">💼</span>
+                    {% endif %}
+                </td>
+                <td>{{ expense.vendor or '-' }}</td>
+                <td class="text-right">${{ "%.2f"|format(expense.amount) }}</td>
+                <td class="text-right">
+                    <a href="/expenses/{{ expense.id }}/edit" class="btn btn-sm btn-secondary">Edit</a>
+                    <form action="/expenses/{{ expense.id }}/delete" method="post" style="display:inline;" onsubmit="return confirm('Delete this expense?')">
+                        <button type="submit" class="btn btn-sm btn-danger">X</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not expenses %}
+            <tr><td colspan="6" class="text-center" style="padding: 2rem;">No expenses found.</td></tr>
+            {% endif %}
+            <tr style="background-color: #f8fafc; font-weight: bold;">
+                <td colspan="4" class="text-right">Total:</td>
+                <td class="text-right">${{ "%.2f"|format(total_amount) }}</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

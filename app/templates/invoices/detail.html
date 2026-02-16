@@ -1,0 +1,122 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-4 no-print">
+    <div>
+        <a href="/invoices" style="color: var(--text-secondary); text-decoration: none;">&larr; Back to Invoices</a>
+    </div>
+    <div class="flex gap-2">
+        <button onclick="window.print()" class="btn btn-secondary">Print / PDF</button>
+        <a href="/invoices/{{ invoice.id }}/edit" class="btn btn-secondary">Edit</a>
+        
+        <!-- Status Actions -->
+        {% if invoice.status == 'draft' %}
+        <form action="/invoices/{{ invoice.id }}/status" method="post" style="display:inline;">
+            <input type="hidden" name="status_val" value="sent">
+            <button type="submit" class="btn btn-primary">Mark Sent</button>
+        </form>
+        {% endif %}
+        
+        {% if invoice.status != 'paid' and invoice.status != 'cancelled' %}
+        <form action="/invoices/{{ invoice.id }}/status" method="post" style="display:inline;">
+            <input type="hidden" name="status_val" value="paid">
+            <button type="submit" class="btn btn-primary" style="background-color: var(--success); border-color: var(--success);">Mark Paid</button>
+        </form>
+        {% endif %}
+        
+        {% if invoice.status != 'cancelled' %}
+        <form action="/invoices/{{ invoice.id }}/status" method="post" style="display:inline;">
+            <input type="hidden" name="status_val" value="cancelled">
+            <button type="submit" class="btn btn-secondary" style="color: var(--danger); border-color: var(--danger);">Cancel</button>
+        </form>
+        {% endif %}
+        
+        <form action="/invoices/{{ invoice.id }}/delete" method="post" style="display:inline;" onsubmit="return confirm('Are you sure? This cannot be undone.')">
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+</div>
+
+<div class="card" style="max-width: 800px; margin: 0 auto; min-height: 1000px;">
+    <!-- Invoice Layout -->
+    <div class="invoice-header">
+        <div class="company-info">
+            <h2>Your Company Name</h2>
+            <p>123 Business Rd</p>
+            <p>San Francisco, CA 94107</p>
+            <p>billing@yourcompany.com</p>
+        </div>
+        <div class="invoice-meta">
+            <h1>INVOICE</h1>
+            <div class="meta-group">
+                <span class="meta-label">Invoice #:</span> {{ invoice.invoice_number }}
+            </div>
+            <div class="meta-group">
+                <span class="meta-label">Date:</span> {{ invoice.issue_date }}
+            </div>
+            <div class="meta-group">
+                <span class="meta-label">Due Date:</span> {{ invoice.due_date }}
+            </div>
+            <div class="meta-group" style="margin-top: 1rem;">
+                <span class="badge badge-{{ invoice.status }}" style="font-size: 1rem;">{{ invoice.status|upper }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bill-to">
+        <h3>Bill To:</h3>
+        <p><strong>{{ invoice.client.name }}</strong></p>
+        {% if invoice.client.address %}<p>{{ invoice.client.address }}</p>{% endif %}
+        <p>
+            {% if invoice.client.city %}{{ invoice.client.city }}{% endif %}
+            {% if invoice.client.country %}, {{ invoice.client.country }}{% endif %}
+        </p>
+        {% if invoice.client.tax_id %}<p>Tax ID: {{ invoice.client.tax_id }}</p>{% endif %}
+    </div>
+    
+    <table style="margin-top: 2rem;">
+        <thead>
+            <tr style="background-color: #f8fafc;">
+                <th style="width: 50%;">Description</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Unit Price</th>
+                <th class="text-right">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.line_items %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td class="text-right">{{ item.quantity }}</td>
+                <td class="text-right">${{ "%.2f"|format(item.unit_price) }}</td>
+                <td class="text-right">${{ "%.2f"|format(item.amount) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="summary-section">
+        <table class="summary-table">
+            <tr>
+                <td class="text-right" style="color: var(--text-secondary);">Subtotal:</td>
+                <td class="text-right">${{ "%.2f"|format(invoice.subtotal) }}</td>
+            </tr>
+            <tr>
+                <td class="text-right" style="color: var(--text-secondary);">Tax ({{ invoice.tax_rate }}%):</td>
+                <td class="text-right">${{ "%.2f"|format(invoice.tax_amount) }}</td>
+            </tr>
+            <tr class="total-row">
+                <td class="text-right">Total:</td>
+                <td class="text-right">${{ "%.2f"|format(invoice.total) }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    {% if invoice.notes %}
+    <div style="margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+        <h3>Notes:</h3>
+        <p style="color: var(--text-secondary);">{{ invoice.notes }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
