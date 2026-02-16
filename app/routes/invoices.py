@@ -22,7 +22,7 @@ async def list_invoices(
 ):
     clients = db.query(Client.id).filter(Client.user_id == str(user.id)).subquery()
     invoices = db.query(Invoice).filter(Invoice.client_id.in_(clients)).order_by(desc(Invoice.issue_date)).all()
-    return templates.TemplateResponse("invoices/list.html", {"request": request, "user": user, "invoices": invoices})
+    return templates.TemplateResponse("invoices/list.html", {"request": request, "user": user, "invoices": invoices, "today": date.today()})
 
 @router.get("/invoices/new", response_class=HTMLResponse)
 async def new_invoice_form(
