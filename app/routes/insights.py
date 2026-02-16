@@ -81,7 +81,7 @@ async def analyze_insights(
     if body.insight_type == "revenue_forecast":
         # Get recent invoices
         # User's clients
-        client_ids = db.query(Client.id).filter(Client.user_id == user.id).all()
+        client_ids = db.query(Client.id).filter(Client.user_id == str(user.id)).all()
         client_ids = [c[0] for c in client_ids]
         
         invoices = db.query(Invoice).filter(Invoice.client_id.in_(client_ids)).order_by(desc(Invoice.issue_date)).limit(50).all()
@@ -89,22 +89,22 @@ async def analyze_insights(
         context_data = f"Invoices: {json.dumps(inv_data)}"
         
     elif body.insight_type == "expense_analysis":
-        expenses = db.query(Expense).filter(Expense.user_id == user.id).order_by(desc(Expense.date)).limit(50).all()
+        expenses = db.query(Expense).filter(Expense.user_id == str(user.id)).order_by(desc(Expense.date)).limit(50).all()
         exp_data = [serialize_model(e) for e in expenses]
         context_data = f"Expenses: {json.dumps(exp_data)}"
         
     elif body.insight_type == "cash_flow":
-        client_ids = db.query(Client.id).filter(Client.user_id == user.id).all()
+        client_ids = db.query(Client.id).filter(Client.user_id == str(user.id)).all()
         client_ids = [c[0] for c in client_ids]
         invoices = db.query(Invoice).filter(Invoice.client_id.in_(client_ids)).order_by(desc(Invoice.issue_date)).limit(20).all()
-        expenses = db.query(Expense).filter(Expense.user_id == user.id).order_by(desc(Expense.date)).limit(20).all()
+        expenses = db.query(Expense).filter(Expense.user_id == str(user.id)).order_by(desc(Expense.date)).limit(20).all()
         
         inv_data = [serialize_model(i) for i in invoices]
         exp_data = [serialize_model(e) for e in expenses]
         context_data = f"Invoices: {json.dumps(inv_data)}\nExpenses: {json.dumps(exp_data)}"
         
     elif body.insight_type == "client_summary":
-        clients = db.query(Client).filter(Client.user_id == user.id).all()
+        clients = db.query(Client).filter(Client.user_id == str(user.id)).all()
         client_data = []
         for c in clients:
             c_dict = serialize_model(c)

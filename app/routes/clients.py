@@ -18,7 +18,7 @@ async def list_clients(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    clients = db.query(Client).filter(Client.user_id == user.id).order_by(Client.name).all()
+    clients = db.query(Client).filter(Client.user_id == str(user.id)).order_by(Client.name).all()
     
     # Calculate stats for each client
     for client in clients:
@@ -53,7 +53,7 @@ async def create_client(
     sub: Any = Depends(get_active_subscription)
 ):
     new_client = Client(
-        user_id=user.id,
+        user_id=str(user.id),
         name=name,
         email=email,
         phone=phone,
@@ -76,7 +76,7 @@ async def client_detail(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    client = db.query(Client).filter(Client.id == id, Client.user_id == user.id).first()
+    client = db.query(Client).filter(Client.id == id, Client.user_id == str(user.id)).first()
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
         
@@ -100,7 +100,7 @@ async def edit_client_form(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    client = db.query(Client).filter(Client.id == id, Client.user_id == user.id).first()
+    client = db.query(Client).filter(Client.id == id, Client.user_id == str(user.id)).first()
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
         
@@ -122,7 +122,7 @@ async def update_client(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    client = db.query(Client).filter(Client.id == id, Client.user_id == user.id).first()
+    client = db.query(Client).filter(Client.id == id, Client.user_id == str(user.id)).first()
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
         
@@ -146,7 +146,7 @@ async def delete_client(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    client = db.query(Client).filter(Client.id == id, Client.user_id == user.id).first()
+    client = db.query(Client).filter(Client.id == id, Client.user_id == str(user.id)).first()
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
     

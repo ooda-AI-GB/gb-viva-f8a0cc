@@ -20,7 +20,7 @@ async def list_invoices(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    clients = db.query(Client.id).filter(Client.user_id == user.id).subquery()
+    clients = db.query(Client.id).filter(Client.user_id == str(user.id)).subquery()
     invoices = db.query(Invoice).filter(Invoice.client_id.in_(clients)).order_by(desc(Invoice.issue_date)).all()
     return templates.TemplateResponse("invoices/list.html", {"request": request, "user": user, "invoices": invoices})
 
@@ -31,7 +31,7 @@ async def new_invoice_form(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    clients = db.query(Client).filter(Client.user_id == user.id).all()
+    clients = db.query(Client).filter(Client.user_id == str(user.id)).all()
     
     # Auto-generate invoice number
     today = date.today()
@@ -75,7 +75,7 @@ async def create_invoice(
     sub: Any = Depends(get_active_subscription)
 ):
     # Verify client belongs to user
-    client = db.query(Client).filter(Client.id == client_id, Client.user_id == user.id).first()
+    client = db.query(Client).filter(Client.id == client_id, Client.user_id == str(user.id)).first()
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
         
@@ -132,7 +132,7 @@ async def invoice_detail(
     sub: Any = Depends(get_active_subscription)
 ):
     # Join with Client to ensure ownership
-    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == user.id).first()
+    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == str(user.id)).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
         
@@ -146,11 +146,11 @@ async def edit_invoice_form(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == user.id).first()
+    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == str(user.id)).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
         
-    clients = db.query(Client).filter(Client.user_id == user.id).all()
+    clients = db.query(Client).filter(Client.user_id == str(user.id)).all()
     
     return templates.TemplateResponse("invoices/form.html", {
         "request": request, 
@@ -177,7 +177,7 @@ async def update_invoice(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == user.id).first()
+    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == str(user.id)).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
 
@@ -229,7 +229,7 @@ async def update_invoice_status(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == user.id).first()
+    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == str(user.id)).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
         
@@ -252,7 +252,7 @@ async def delete_invoice(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == user.id).first()
+    invoice = db.query(Invoice).join(Client).filter(Invoice.id == id, Client.user_id == str(user.id)).first()
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
         

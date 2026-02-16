@@ -20,7 +20,7 @@ async def list_expenses(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    query = db.query(Expense).filter(Expense.user_id == user.id)
+    query = db.query(Expense).filter(Expense.user_id == str(user.id))
     if category:
         query = query.filter(Expense.category == category)
         
@@ -62,7 +62,7 @@ async def create_expense(
     sub: Any = Depends(get_active_subscription)
 ):
     new_expense = Expense(
-        user_id=user.id,
+        user_id=str(user.id),
         description=description,
         amount=amount,
         date=datetime.datetime.strptime(date, "%Y-%m-%d").date(),
@@ -82,7 +82,7 @@ async def edit_expense_form(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    expense = db.query(Expense).filter(Expense.id == id, Expense.user_id == user.id).first()
+    expense = db.query(Expense).filter(Expense.id == id, Expense.user_id == str(user.id)).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
         
@@ -102,7 +102,7 @@ async def update_expense(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    expense = db.query(Expense).filter(Expense.id == id, Expense.user_id == user.id).first()
+    expense = db.query(Expense).filter(Expense.id == id, Expense.user_id == str(user.id)).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
         
@@ -124,7 +124,7 @@ async def delete_expense(
     user: Any = Depends(get_current_user),
     sub: Any = Depends(get_active_subscription)
 ):
-    expense = db.query(Expense).filter(Expense.id == id, Expense.user_id == user.id).first()
+    expense = db.query(Expense).filter(Expense.id == id, Expense.user_id == str(user.id)).first()
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
         

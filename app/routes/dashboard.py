@@ -22,14 +22,14 @@ async def dashboard(
     sub: Any = Depends(get_active_subscription)
 ):
     # Seed data check
-    seed_data(db, user.id)
+    seed_data(db, str(user.id))
 
     # 1. Revenue Summary (This Month)
     today = date.today()
     first_day_of_month = date(today.year, today.month, 1)
     
     # Invoices for this user
-    user_clients_subquery = db.query(Client.id).filter(Client.user_id == user.id).subquery()
+    user_clients_subquery = db.query(Client.id).filter(Client.user_id == str(user.id)).subquery()
     
     invoices_this_month = db.query(Invoice).filter(
         Invoice.client_id.in_(user_clients_subquery),
@@ -63,7 +63,7 @@ async def dashboard(
     ).order_by(desc(Invoice.created_at)).limit(10).all()
     
     # 4. Quick Stats
-    total_clients = db.query(Client).filter(Client.user_id == user.id).count()
+    total_clients = db.query(Client).filter(Client.user_id == str(user.id)).count()
     invoice_count_month = len(invoices_this_month)
     
     # Revenue YTD
@@ -77,7 +77,7 @@ async def dashboard(
     
     # Expenses YTD
     expenses_ytd_records = db.query(Expense).filter(
-        Expense.user_id == user.id,
+        Expense.user_id == str(user.id),
         Expense.date >= first_day_year
     ).all()
     expenses_ytd = sum(exp.amount for exp in expenses_ytd_records)
@@ -116,7 +116,7 @@ async def dashboard(
         
         # Expenses
         m_expenses = db.query(func.sum(Expense.amount)).filter(
-            Expense.user_id == user.id,
+            Expense.user_id == str(user.id),
             Expense.date >= m_start,
             Expense.date <= m_end
         ).scalar() or 0.0
